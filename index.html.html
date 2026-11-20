@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khmer Raw Translator – បកប្រែខ្មែរចំត្រង់</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ink:#0d0f14;--panel:#161922;--line:#272b38;--paper:#ece8e1;--dim:#ece8e199;--gold:#f0b44c;--lotus:#e2638b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:"Kantumruy Pro","Noto Sans Khmer","Khmer OS",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:640px;margin:0 auto;padding:16px 16px 130px;display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:flex-start}
+h1{font-size:1.35rem;margin:0}header p{margin:2px 0 0;color:var(--dim);font-size:.85rem}
+button{font:inherit;color:inherit;cursor:pointer}
+.b{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:.9rem;transition:transform .1s}
+.b:active{transform:scale(.95)}.b:disabled{opacity:.4;cursor:default}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:4px}
+.modes button{background:none;border:0;border-radius:12px;padding:8px 4px;font-size:.9rem;color:var(--dim);line-height:1.3}
+.modes small{display:block;font-size:.75rem;opacity:.75}
+.modes button[aria-selected=true]{background:var(--gold);color:var(--ink);font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+.lab{display:flex;justify-content:space-between;font-size:.75rem;color:var(--dim);margin-bottom:4px}
+textarea{width:100%;background:none;border:0;outline:0;resize:none;color:inherit;font:inherit;line-height:1.6}
+textarea::placeholder{color:#ece8e14d}
+#out{white-space:pre-wrap;word-break:break-word;line-height:1.6;min-height:3.2em;margin:0;font-weight:600}
+.ph{color:#ece8e14d}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#note{font-size:.8rem;color:var(--dim);margin:8px 0 0}
+#ask{margin-top:10px;border:1px solid #f0b44c66;background:#f0b44c1a;color:var(--gold);border-radius:12px;padding:8px 10px;font-size:.9rem}
+#err{border:1px solid #e2638b80;background:#e2638b1a;border-radius:12px;padding:10px 12px;font-size:.9rem}
+.sz{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--dim)}.sz input{flex:1;accent-color:var(--gold)}
+.h{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 0}
+.h span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.h span:first-child{color:var(--dim);font-size:.85rem}
+nav{position:fixed;left:0;right:0;bottom:0;background:#0d0f14f2;border-top:1px solid var(--line);padding:12px 24px calc(12px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(8px)}
+nav div{max-width:640px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+#mic{width:92px;height:92px;line-height:1.2;text-align:center;border-radius:50%;border:0;background:var(--gold);color:var(--ink);font-size:.75rem;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .1s}
+#mic:active{transform:scale(.95)}
+#mic.on{background:var(--lotus);animation:ring 1.4s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 #e2638b8c}100%{box-shadow:0 0 0 26px #e2638b00}}
+@media (prefers-reduced-motion:reduce){#mic.on{animation:none}}
+#toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--paper);color:var(--ink);border-radius:99px;padding:5px 16px;font-size:.85rem}
+#warn{margin-top:10px;border:1px solid #e2638b80;background:#e2638b1a;border-radius:12px;padding:8px 10px;font-size:.88rem}
+#det{font-size:.75rem;color:var(--dim);margin:8px 0 0}
+.sec{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.sec>p{margin:0 0 6px;font-size:.75rem;color:var(--dim)}
+.alt{font-size:.92rem;margin:4px 0}.alt span{color:var(--dim)}
+details{border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}summary{cursor:pointer}summary i{color:var(--dim);font-style:normal;font-size:.8rem}
+.sn{margin:4px 0 4px 12px;font-size:.88rem;color:var(--dim)}
+.fine{font-size:.75rem;color:var(--dim);margin:0}
+.lt{margin:0;line-height:1.5;font-size:1.1rem;min-height:1.6em}.lt.part{font-style:italic;color:var(--dim)}.lt.km{font-weight:600;font-size:1.3rem}
+.pair{border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--panel);border-radius:12px;padding:10px 12px;margin-top:8px}.pair .en{font-size:.85rem;color:var(--dim)}.pair .kh{font-weight:600;font-size:1.15rem;margin-top:2px;word-break:break-word}
+#len,#lkm{border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+select{width:100%;margin-top:8px;background:var(--ink);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;padding:9px 12px}
+input[type=search]{flex:1;min-width:0;background:var(--ink);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;padding:9px 12px}
+.ent{border-top:1px solid var(--line);padding:8px 0}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1>បកប្រែខ្មែរចំត្រង់</h1><p>Khmer Raw Translator</p></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="b" id="liveBtn">Live</button><button class="b" id="dictBtn">Dictionary</button><button class="b" id="histBtn">History</button></div>
+  </header>
+
+  <div class="modes" role="tablist" id="modes">
+    <button role="tab" data-m="normal" aria-selected="false">Normal<small>ធម្មតា</small></button>
+    <button role="tab" data-m="raw" aria-selected="true">Raw slang<small>ចំត្រង់</small></button>
+    <button role="tab" data-m="context" aria-selected="false">Context<small>តាមបរិបទ</small></button>
+  </div>
+
+  <section class="card">
+    <div class="lab"><span id="fromL">English</span><span id="cnt">0/4000</span></div>
+    <textarea id="src" rows="5" spellcheck="false" placeholder="Type or speak English…"></textarea>
+  </section>
+
+  <section class="card" style="min-height:160px">
+    <div class="lab"><span id="toL">ខ្មែរ</span><span id="busy" style="color:var(--gold)" hidden>Translating…</span></div>
+    <p id="out"><span class="ph">ការបកប្រែនឹងបង្ហាញនៅទីនេះ</span></p>
+    <p id="note" hidden></p>
+    <div id="ask" hidden></div>
+    <div id="warn" hidden></div><p id="det" hidden></p><div id="alts" class="sec" hidden></div><div id="words" class="sec" hidden></div>
+    <div class="row">
+      <button class="b" id="copy" disabled>Copy</button>
+      <button class="b" id="speak" disabled>Speak</button>
+      <button class="b" id="share" disabled>Share</button>
+    </div>
+  </section>
+
+  <label class="sz">Text size <input id="size" type="range" min="16" max="36" value="22"></label>
+  <div id="err" role="alert" hidden></div>
+  <p class="fine">Coverage is broad but not guaranteed. Rare, technical, regional and vulgar terms are flagged when the AI is unsure. Verify important or sensitive translations with a native Khmer speaker.</p>
+
+  <section id='live' hidden><div class='card'><div class='lab'><span id='lst'>Stopped</span><span id='lbusy' hidden style='color:var(--gold)'>Translating…</span></div><p id='len' class='lt'>Press Listen and speak English.</p><div class='lab' style='margin-top:14px'><span>ខ្មែរ</span></div><p id='lkm' class='lt km'></p></div><div class='row'><button class='b' id='lpause' disabled>Pause</button><button class='b' id='lmute' disabled>Mute</button><button class='b' id='lstop' disabled>Stop</button><button class='b' id='lclear'>Clear</button></div><div class='card' style='margin-top:12px'><div class='lab'><span>Khmer voice</span></div><div class='row' style='margin-top:0'><button class='b' id='tplay'>Play</button><button class='b' id='tpause'>Pause</button><button class='b' id='tres'>Resume</button><button class='b' id='tstop'>Stop</button></div><label class='sz' style='margin-top:10px'>Speed <input id='trate' type='range' min='0.5' max='1.5' step='0.1' value='0.9'></label><select id='tvoice' hidden></select><p class='fine' id='tnote'></p></div><div id='convo'></div></section>
+
+  <section class="card" id="dictS" hidden>
+    <div class="lab"><b>Dictionary</b><span id="dcount"></span></div>
+    <div style="display:flex;gap:8px"><input type="search" id="dq" placeholder="Search or look up an English word" autocomplete="off"><button class="b" id="dgo">Look up</button></div>
+    <div id="dres"></div>
+  </section>
+
+  <section class="card" id="hist" hidden>
+    <div style="display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:6px"><b>History</b><button id="histClear" style="background:none;border:0;color:var(--lotus)">Clear all</button></div>
+    <div id="histList"></div>
+  </section>
+</main>
+
+<nav><div>
+  <button class="b" id="swap" aria-label="Swap languages">⇄ Swap</button>
+  <button id="mic" aria-label="Start listening"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2Z"/></svg><span id="micT">Listen / ស្ដាប់</span></button>
+  <button class="b" id="clear" aria-label="Clear text">Clear</button>
+</div></nav>
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+let mode="raw",dir="en-km",hist=[],ctl=null,timer=null,listening=false,want=false,rec=null,base="",finals="",sample=null,dict=null;
+const RULES={
+ normal:"NORMAL mode: natural, standard Khmer. A neutral, polite register is acceptable.",
+ raw:"RAW SLANG mode: translate vulgar, sexual and slang language into the direct, colloquial Khmer a native speaker would actually say. Never soften, censor or swap in polite or clinical words. Keep the same level of vulgarity and emotion as the source.",
+ context:"CONTEXT mode: work out what the whole sentence really means (idioms, sarcasm, double meanings) and translate that meaning, keeping the original tone and register, explicit or not. Do not translate word by word."};
+const GLOSS="Vocabulary examples supplied by the site owner. They are NOT fixed replacements: pick the right Khmer by context, register and meaning, and flag any you doubt in warning. pussy → កណ្ដួយ; dick/cock → ក្ដ; clitoris → គ្លីតូរីស; vagina → ទ្វារមាស; penis → លិង្គ; boobs → ដោះ (breast: ដោះ or សុដន់); ass → គូទ (រដុប: លា); blowjob → រួមភេទដោយមាត់; masturbation → សម្រេចកាមដោយខ្លួនឯង; orgasm → ដល់ចំណុចកំពូល; fuck → translate by meaning and context (verb, insult, exclamation or intensifier each differ).";
+try{hist=JSON.parse(localStorage.getItem("krt")||"[]")}catch(e){}
+const save=()=>{try{localStorage.setItem("krt",JSON.stringify(hist))}catch(e){}};
+const toast=m=>{const t=$("toast");t.textContent=m;t.hidden=false;setTimeout(()=>t.hidden=true,1600)};
+const showErr=m=>{$("err").textContent=m;$("err").hidden=!m};
+const out=()=>$("out").dataset.v||"";
+function renderExtra(d){
+  const mk=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+  const conf=d.confidence;
+  const w=$("warn");w.textContent=d.warning||(conf==="low"?"Low confidence: please verify this translation with a native speaker.":conf==="medium"?"Medium confidence: some terms may need checking.":"");w.hidden=!w.textContent;
+  const dt=$("det");dt.textContent=d.detected&&$("out").dataset.v?"Detected: "+({en:"English",km:"Khmer"}[d.detected]||"another language")+(conf?" · confidence "+conf:""):"";if(d.register&&dt.textContent)dt.textContent+=" · register: "+d.register;dt.hidden=!dt.textContent;
+  const al=$("alts");al.textContent="";const as=d.alternatives||[];
+  if(as.length){al.appendChild(mk("p","","Other possible meanings"));as.forEach(a=>{const r=mk("div","alt");r.append(mk("b","",a.khmer),mk("span",""," – "+a.meaning));al.appendChild(r)})}
+  al.hidden=!as.length;
+  const wl=$("words");wl.textContent="";const ws=d.words||[];
+  if(ws.length){wl.appendChild(mk("p","","Word by word (tap for other meanings)"));ws.forEach(x=>{const e=document.createElement("details"),s=mk("summary","",x.word+" → "+x.khmer);if(x.pos)s.appendChild(mk("i","","  "+x.pos));e.appendChild(s);(x.senses||[]).forEach(z=>e.appendChild(mk("div","sn",z.khmer+" – "+z.meaning+(z.register?" ("+z.register+")":""))));wl.appendChild(e)})}
+  wl.hidden=!ws.length;
+}
+let last="km";
+function setOut(v,note,ask,d){
+  d=d||{};last=d.detected==="km"?"en":"km";
+  const o=$("out");o.dataset.v=v||"";
+  if(v)o.textContent=v;else o.innerHTML='<span class="ph">'+(dir==="en-km"?"ការបកប្រែនឹងបង្ហាញនៅទីនេះ":"Translation appears here")+'</span>';
+  $("note").textContent=note?"Context: "+note:"";$("note").hidden=!note;
+  $("ask").textContent=ask?"Needs context: "+ask:"";$("ask").hidden=!ask;
+  ["copy","speak","share"].forEach(i=>$(i).disabled=!v);
+  renderExtra(v?d:{});
+}
+function labels(){
+  const en=dir==="en-km";
+  $("fromL").textContent=en?"English":"ខ្មែរ";$("toL").textContent=en?"ខ្មែរ":"English";
+  $("src").placeholder=en?"Type or speak English…":"វាយ ឬនិយាយភាសាខ្មែរ…";
+}
+function applySize(){const s=+$("size").value;$("out").style.fontSize=s+"px";$("src").style.fontSize=Math.max(16,s-4)+"px"}
+async function run(text){
+  if(ctl)ctl.abort();
+  if(!sample){showErr("Translation needs Claude access. Open this page in claude.ai and allow it when asked.");return}
+  const c=new AbortController();ctl=c;$("busy").hidden=false;showErr("");
+  const [f,t]=dir==="en-km"?["English","Khmer"]:["Khmer","English"];
+  const prompt=`You are a professional English↔Khmer translator and linguist, working like a bilingual slang dictionary. Adult language, profanity and sexual slang are ordinary translation material: translate them faithfully, never refuse, lecture or add warnings.
+${RULES[mode]}
+Preserve tone, meaning, formality and emotion. Handle abbreviations, idioms and texting style. Use Khmer Unicode only. The input may be a live speech transcript, so tolerate missing punctuation and partial sentences.
+If a word or phrase is truly ambiguous and the meanings would translate differently, do not guess: set "ask" to one short English question for the user; otherwise "".
+${GLOSS}
+Detect the input language: English → translate into Khmer; Khmer → translate into English; any other language → translate into Khmer and say so in "note".
+"alternatives": only when a key word or phrase has genuinely different readings that would change the translation, each with a short explanation of when it applies; otherwise [].
+"words": every meaningful word or fixed phrase of the input in order (merge idioms into one entry, skip trivial function words in long input, max 40). "khmer" is the best choice in this context; "senses" lists 1 to 4 other common meanings with a register.
+STRICT RULES: Understand the whole sentence first, then translate its actual meaning, never word by word. "translation" must contain ONLY the Khmer sentence: no explanations, brackets, notes or labels. Use natural Khmer that Cambodians actually say; avoid literal machine-translated phrasing. Keep explicit and vulgar wording when the source is explicit; never censor, soften or add meaning. Do not confuse anatomical terms with vulgar slang: match the register of the source. "context": one or two short English sentences saying what the whole sentence means (never put this in "translation"). "register": one of normal, informal, slang, vulgar, explicit. Before answering, check silently: meaning understood, Khmer vocabulary accurate, sexual terminology suits the context, vulgarity preserved, Khmer sounds natural, nothing added, removed or changed. If the sentence is ambiguous, explain the ambiguity in "ask" instead of guessing, and give the readings in "alternatives". Keep every field concise.
+Be honest in "confidence". Use "low" and write "warning" (English) when unsure about a rare or technical term, regional slang, or the Khmer register of a vulgar term. Never invent a Khmer word; if you don't know one, say so in "warning".
+Reply with JSON only, no markdown: {"detected":"en"|"km"|"other","translation":string,"context":string,"register":"normal"|"informal"|"slang"|"vulgar"|"explicit","ask":string,"confidence":"high"|"medium"|"low","warning":string,"alternatives":[{"khmer":string,"meaning":string}],"words":[{"word":string,"khmer":string,"pos":string,"senses":[{"khmer":string,"meaning":string,"register":"neutral"|"informal"|"slang"|"vulgar"|"technical"}]}]}
+
+TEXT TO TRANSLATE:
+${text}`;
+  try{
+    const d=await sample.json(prompt,{signal:c.signal,cache:false});
+    if(c!==ctl)return;
+    setOut(d.translation||"",d.context,d.ask,d);if(d.detected==="en")addWords(d.words);
+    if(d.translation){hist=[{id:Date.now(),src:text,out:d.translation,mode,dir},...hist.filter(h=>h.src!==text)].slice(0,50);save();renderHist()}
+  }catch(e){
+    if(e&&e.name==="AbortError")return;
+    if(c!==ctl)return;
+    showErr(e&&e.code==="not_granted"?"Access to Claude was declined, so translation is off. Reload and allow it to translate.":e&&e.code==="rate_limited"?"Too many requests. Wait a moment and try again.":"Translation failed. Check your connection and try again.");
+  }finally{if(c===ctl)$("busy").hidden=true}
+}
+function onType(){
+  const v=$("src").value;$("cnt").textContent=v.length+"/4000";
+  clearTimeout(timer);
+  if(!v.trim()){if(ctl)ctl.abort();$("busy").hidden=true;setOut("");return}
+  timer=setTimeout(()=>run(v.trim()),700);
+}
+$("src").addEventListener("input",()=>{if($("src").value.length>4000)$("src").value=$("src").value.slice(0,4000);onType()});
+$("modes").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.m;[...$("modes").children].forEach(x=>x.setAttribute("aria-selected",x===b));onType()});
+$("size").addEventListener("input",applySize);
+
+// microphone
+const setMic=on=>{listening=on;$("mic").classList.toggle("on",on);$("micT").textContent=on?"Stop":"Listen";$("mic").setAttribute("aria-label",on?"Stop listening":"Start listening")};
+function setSrc(v){$("src").value=v;onType()}
+function startMic(){
+  showErr("");
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    if(dict){ // fallback: platform dictation (English/others per viewer)
+      base=$("src").value?$("src").value.trimEnd()+" ":"";
+      dict.start().then(()=>setMic(true)).catch(e=>showErr(e&&e.code==="not_granted"?"Microphone access was declined.":"Couldn't start the microphone."));
+      return;
+    }
+    return showErr("Speech recognition isn't supported in this browser. Try Chrome on Android, or Safari on iOS 14.5 or later.");
+  }
+  const r=new SR();r.lang=dir==="en-km"?"en-US":"km-KH";r.continuous=true;r.interimResults=true;
+  base=$("src").value?$("src").value.trimEnd()+" ":"";finals="";
+  r.onresult=e=>{let it="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finals+=t+" ";else it+=t}setSrc(base+finals+it)};
+  r.onerror=e=>{
+    if(e.error==="no-speech"||e.error==="aborted")return;
+    want=false;setMic(false);
+    showErr(e.error==="not-allowed"||e.error==="service-not-allowed"?"Microphone blocked. Allow microphone access for this page in your browser settings, then try again.":"Microphone error: "+e.error);
+  };
+  r.onend=()=>{if(want){base+=finals;finals="";try{r.start()}catch(e){}}else setMic(false)};
+  rec=r;want=true;
+  try{r.start();setMic(true)}catch(e){showErr("Couldn't start the microphone.")}
+}
+function stopMic(){want=false;if(rec)try{rec.stop()}catch(e){}if(dict)dict.stop().catch(()=>{});setMic(false)}
+$("mic").addEventListener("click",micClick);
+
+// actions
+const copy=async t=>{try{await navigator.clipboard.writeText(t);toast("Copied")}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Copied")}catch(_){toast("Copy failed")}a.remove()}};
+$("copy").onclick=()=>copy(out());
+$("share").onclick=async()=>{const t=$("src").value+"\n\n"+out();if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else copy(t)};
+$("speak").onclick=()=>{
+  if(!("speechSynthesis" in window))return showErr("Text-to-speech isn't available in this browser.");
+  const lang=last==="en"?"en-US":"km-KH";
+  const v=speechSynthesis.getVoices().find(x=>x.lang.toLowerCase().startsWith(lang.slice(0,2)));
+  if(lang==="km-KH"&&!v)return showErr("No Khmer voice is installed on this device. Add one in your system's text-to-speech settings.");
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(out());u.lang=lang;if(v)u.voice=v;speechSynthesis.speak(u);
+};
+$("swap").onclick=()=>{if(listening)stopMic();const o=out();dir=dir==="en-km"?"km-en":"en-km";labels();setSrc(o)};
+$("clear").onclick=()=>{showErr("");if(liveOn()){clearConvo();return}if(listening)stopMic();setSrc("")};
+
+// history
+function renderHist(){
+  const l=$("histList");l.textContent="";
+  if(!hist.length){const p=document.createElement("p");p.style.cssText="color:var(--dim);font-size:.9rem";p.textContent="Nothing yet. Your translations appear here.";l.appendChild(p)}
+  hist.forEach(h=>{const b=document.createElement("button");b.className="h";const a=document.createElement("span"),c=document.createElement("span");a.textContent=h.src;c.textContent=h.out;b.append(a,c);
+    b.onclick=()=>{dir=h.dir;mode=h.mode;[...$("modes").children].forEach(x=>x.setAttribute("aria-selected",x.dataset.m===mode));labels();setSrc(h.src);$("hist").hidden=true};l.appendChild(b)});
+}
+$("histBtn").onclick=()=>{$("hist").hidden=!$("hist").hidden};
+$("histClear").onclick=()=>{hist=[];save();renderHist()};
+renderHist();labels();applySize();
+
+// dictionary: grows from every translation and every lookup (saved on this device)
+let lex={};try{lex=JSON.parse(localStorage.getItem("krtd")||"{}")}catch(e){}
+// Starter entries supplied by the site owner (unverified); more are added from use and lookups
+[["pussy","noun","កណ្ដួយ","female genitals (vulgar slang)","vulgar"],["dick","noun","ក្ដ","penis (vulgar slang)","vulgar"],["cock","noun","ក្ដ","penis (vulgar slang)","vulgar"],["clitoris","noun","គ្លីតូរីស","anatomical term","technical"],["vagina","noun","ទ្វារមាស","anatomical term","neutral"],["penis","noun","លិង្គ","anatomical term","neutral"],["boobs","noun","ដោះ","breasts (informal)","informal"],["breast","noun","ដោះ / សុដន់","choose by context","neutral"],["ass","noun","គូទ / លា","buttocks; លា is cruder","slang"],["fuck","verb","(translate by meaning and context)","sex act, insult, exclamation or intensifier: each needs a different Khmer","vulgar"],["blowjob","noun","រួមភេទដោយមាត់","oral sex on a penis","explicit"],["masturbation","noun","សម្រេចកាមដោយខ្លួនឯង","self-stimulation","neutral"],["orgasm","noun","ដល់ចំណុចកំពូល","sexual climax","neutral"]].forEach(a=>{if(!lex[a[0]])lex[a[0]]={word:a[0],pos:a[1],senses:[{khmer:a[2],meaning:a[3],register:a[4]}],warning:"Starter entry from the site owner; not yet verified by a native speaker."}});
+const saveLex=()=>{try{localStorage.setItem("krtd",JSON.stringify(lex))}catch(e){}};
+function addWords(ws){(ws||[]).forEach(w=>{if(w&&w.word&&w.senses&&w.senses.length&&!lex[w.word.toLowerCase()])lex[w.word.toLowerCase()]=w});saveLex();renderLex()}
+function entryEl(e){
+  const d=document.createElement("div");d.className="ent";
+  const h=document.createElement("b");h.textContent=e.word;d.appendChild(h);
+  if(e.pos){const i=document.createElement("span");i.className="fine";i.textContent="  "+e.pos;d.appendChild(i)}
+  (e.senses||[]).forEach(z=>{const n=document.createElement("div");n.className="sn";n.textContent=z.khmer+" – "+z.meaning+(z.register?" ("+z.register+")":"");d.appendChild(n)});
+  if(e.confidence==="low"||e.warning){const n=document.createElement("div");n.className="sn";n.style.color="var(--lotus)";n.textContent=e.warning||"Low confidence: verify with a native speaker.";d.appendChild(n)}
+  return d;
+}
+function renderLex(){
+  const q=$("dq").value.trim().toLowerCase(),r=$("dres");
+  const all=Object.keys(lex),keys=all.filter(k=>!q||k.includes(q)).sort().slice(0,60);
+  $("dcount").textContent=all.length+" saved";r.textContent="";
+  if(!keys.length){const p=document.createElement("p");p.className="fine";p.style.marginTop="8px";p.textContent=q?"No saved match. Press Look up to ask the AI.":"Words you translate are saved here. Search them, or look up any English word.";r.appendChild(p)}
+  keys.forEach(k=>r.appendChild(entryEl(lex[k])));
+}
+async function lookup(){
+  const q=$("dq").value.trim();if(!q)return;
+  if(!sample)return showErr("Dictionary lookup needs Claude access. Allow it when asked.");
+  $("dgo").disabled=true;showErr("");
+  try{
+    const d=await sample.json(`You are an English→Khmer lexicographer. Write a dictionary entry for the English word or phrase below, covering every common sense (up to 6), including slang, technical, adult and vulgar senses where they exist. Each sense has the Khmer word, a short English explanation and a register. Never invent Khmer words; if unsure, set confidence to low and explain in warning. JSON only, no markdown: {"word":string,"pos":string,"senses":[{"khmer":string,"meaning":string,"register":"neutral"|"informal"|"slang"|"vulgar"|"technical"}],"confidence":"high"|"medium"|"low","warning":string}\n\nWORD: ${q}`,{cache:false});
+    if(d&&d.senses&&d.senses.length){d.word=d.word||q;lex[q.toLowerCase()]=d;saveLex();renderLex();if(d.warning||d.confidence==="low")showErr(d.warning||"Low confidence: verify with a native speaker.")}
+    else showErr("No entry found for that word.");
+  }catch(e){showErr(e&&e.code==="not_granted"?"Access to Claude was declined.":"Lookup failed. Try again.")}
+  finally{$("dgo").disabled=false}
+}
+$("dictBtn").onclick=()=>{$("dictS").hidden=!$("dictS").hidden;renderLex()};
+$("dq").addEventListener("input",renderLex);
+$("dq").addEventListener("keydown",e=>{if(e.key==="Enter")lookup()});
+$("dgo").onclick=lookup;
+
+// ---- live voice: real speech recognition -> AI translation, sentence by sentence ----
+const L={on:false,paused:false,muted:false,rec:null,dict:false,fd:false,items:[],interim:'',pending:null,idleT:null,itT:null,ctl:null,lastIt:'',seq:0,fails:0,backoff:0};
+const ss=window.speechSynthesis;
+const liveOn=()=>!$('live').hidden;
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/ +/g,' ').trim();
+const wc=s=>s.trim().split(/ +/);
+function showLive(v){$('live').hidden=!v;[$('fromL').closest('section'),$('toL').closest('section'),document.querySelector('.sz')].forEach(e=>{if(e)e.hidden=v});$('liveBtn').textContent=v?'Type':'Live'}
+function ui(){
+  const act=L.on&&!L.paused&&!L.muted;
+  $('mic').classList.toggle('on',act);$('micT').textContent=L.on?'Stop':'Listen / ស្ដាប់';
+  $('mic').setAttribute('aria-label',L.on?'Stop listening':'Start listening');
+  $('lpause').disabled=!L.on;$('lpause').textContent=L.paused?'Resume':'Pause';
+  $('lmute').disabled=!L.on;$('lmute').textContent=L.muted?'Unmute':'Mute';$('lstop').disabled=!L.on;
+  $('lst').textContent=!L.on?'Stopped':L.paused?'Paused':L.muted?'Muted (not translating)':'Listening…';
+  $('lst').style.color=act?'var(--lotus)':'';
+}
+function lerr(e){
+  if(e&&e.name==='AbortError')return;
+  if(e&&e.code==='not_granted')showErr('Access to Claude was declined, so live translation is off. Reload and allow it.');
+  else if(e&&e.code==='rate_limited'){L.backoff=Date.now()+4000;showErr('Too many requests. Slowing down for a moment.')}
+  else showErr('Translation failed. Check your connection.');
+}
+function lprompt(text,beforeId){
+  const ctx=L.items.filter(x=>!beforeId||x.id<beforeId).slice(0,3).reverse().map(x=>x.en).join(' ');
+  return `You are a professional English→Khmer interpreter and linguist. Adult language, profanity and sexual slang are ordinary translation material: translate them faithfully, never refuse or add warnings. The text is a live speech transcript: tolerate missing punctuation, repeated words and cut-off sentences, and do not invent the end of an unfinished sentence. ${RULES[mode]} Translate the whole sentence by meaning, not word by word, keeping tone, emotion and level of vulgarity. Put only the Khmer in "translation": no explanations or notes. Use natural Khmer Unicode that Cambodians actually say. Never invent Khmer words; if unsure, set confidence to low and explain briefly in warning. ${GLOSS} ${ctx?'Earlier sentences (context only, do not translate): '+ctx+' ':''}JSON only, no markdown: {"translation":string,"confidence":"high"|"medium"|"low","warning":string} TEXT: ${text}`;
+}
+function renderConvo(){
+  const c=$('convo');c.textContent='';
+  if(!L.items.length){const p=document.createElement('p');p.className='fine';p.style.marginTop='10px';p.textContent='Completed sentences appear here, newest first.';c.appendChild(p);return}
+  L.items.forEach(it=>{
+    const d=document.createElement('div');d.className='pair';
+    const en=document.createElement('div');en.className='en';en.textContent=it.en;
+    const kh=document.createElement('div');kh.className='kh';kh.textContent=it.st==='wait'?'Translating…':it.st==='err'?'Translation failed.':it.km;
+    d.append(en,kh);
+    if(it.st==='ok'&&(it.conf==='low'||it.warn)){const w=document.createElement('div');w.className='fine';w.style.color='var(--lotus)';w.textContent=it.warn||'Low confidence: verify with a native speaker.';d.appendChild(w)}
+    const r=document.createElement('div');r.className='row';r.style.marginTop='8px';
+    const mk=(t,f)=>{const b=document.createElement('button');b.className='b';b.textContent=t;b.onclick=f;r.appendChild(b)};
+    if(it.st==='ok'){mk('Play',()=>playText(it.km));mk('Copy',()=>copy(it.km))}
+    if(it.st==='err')mk('Retry',()=>{it.st='wait';renderConvo();translateItem(it)});
+    d.appendChild(r);c.appendChild(d);
+  });
+}
+async function translateItem(it){
+  if(!sample){it.st='err';renderConvo();return showErr('Translation needs Claude access. Allow it when asked.')}
+  const v=it.v=(it.v||0)+1;it.st='wait';$('lbusy').hidden=false;
+  try{
+    const d=await sample.json(lprompt(it.en,it.id),{cache:false,modelTier:'quick'});
+    if(v!==it.v)return;
+    it.km=(d.translation||'').trim();it.conf=d.confidence;it.warn=d.warning||'';it.st=it.km?'ok':'err';
+    if(it.km){hist=[{id:Date.now(),src:it.en,out:it.km,mode,dir:'en-km'},...hist.filter(h=>h.src!==it.en)].slice(0,50);save();renderHist()}
+  }catch(e){if(v!==it.v)return;it.st='err';lerr(e)}
+  renderConvo();
+  if(!L.items.some(x=>x.st==='wait'))$('lbusy').hidden=true;
+}
+function clearInterim(){L.interim='';L.lastIt='';$('len').textContent=L.on?'Listening…':'Press Listen and speak English.';$('len').className='lt';$('lkm').textContent='';$('lkm').className='lt km'}
+function commit(text,byTimer){
+  text=(text||'').trim();if(!text)return;
+  clearTimeout(L.idleT);clearTimeout(L.itT);if(L.ctl)L.ctl.abort();
+  const last=L.items[0];if(last&&norm(last.en)===norm(text)){clearInterim();return}
+  const it={id:++L.seq,en:text,km:'',st:'wait',t:Date.now()};
+  L.items.unshift(it);if(L.items.length>100)L.items.pop();
+  L.pending=byTimer?it:null;
+  clearInterim();renderConvo();translateItem(it);
+}
+async function partial(t){
+  if(!sample||t!==L.interim||Date.now()<L.backoff)return;
+  L.lastIt=t;if(L.ctl)L.ctl.abort();const c=new AbortController();L.ctl=c;$('lbusy').hidden=false;
+  try{
+    const d=await sample.json(lprompt(t),{signal:c.signal,cache:false,modelTier:'quick'});
+    if(c!==L.ctl||t!==L.interim)return;
+    $('lkm').textContent=d.translation||'';$('lkm').className='lt km part';
+  }catch(e){if(c===L.ctl)lerr(e)}
+  finally{if(c===L.ctl&&!L.items.some(x=>x.st==='wait'))$('lbusy').hidden=true}
+}
+function onInterim(t){
+  if(L.muted||!L.on||L.paused)return;
+  t=(t||'').trim();
+  if(L.pending){const pw=wc(L.pending.en).length,tw=wc(t);if(norm(tw.slice(0,pw).join(' '))===norm(L.pending.en))t=tw.slice(pw).join(' ')}
+  L.interim=t;$('len').textContent=t||'Listening…';$('len').className='lt'+(t?' part':'');
+  clearTimeout(L.idleT);clearTimeout(L.itT);
+  if(!t){$('lkm').textContent='';return}
+  L.idleT=setTimeout(()=>commit(L.interim,true),1500);
+  if(wc(t).length>=2&&t!==L.lastIt)L.itT=setTimeout(()=>partial(t),700);
+}
+function onFinalText(f){
+  if(L.muted||!L.on||L.paused)return;
+  f=(f||'').trim();if(!f)return;
+  clearTimeout(L.idleT);clearTimeout(L.itT);
+  const p=L.pending;
+  if(p){
+    L.pending=null;
+    const pw=wc(p.en).length,fw=wc(f);
+    if(norm(fw.slice(0,pw).join(' '))===norm(p.en)){f=fw.slice(pw).join(' ').trim();if(!f){clearInterim();return}}
+    else if(Date.now()-p.t<8000){p.en=f;p.km='';renderConvo();translateItem(p);clearInterim();return}
+  }
+  commit(f,false);
+}
+function haltEngine(){const r=L.rec;L.rec=null;if(r){r.onend=null;try{r.stop()}catch(e){}}if(L.dict&&dict)dict.stop().catch(()=>{});}
+function startEngine(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR&&!L.fd){
+    L.dict=false;
+    const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;const t0=Date.now();
+    r.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)onFinalText(t);else it+=t}if(it)onInterim(it)};
+    r.onerror=e=>{
+      if(e.error==='no-speech'||e.error==='aborted')return;
+      if((e.error==='not-allowed'||e.error==='service-not-allowed')&&dict){L.fd=true;return}
+      showErr(e.error==='not-allowed'||e.error==='service-not-allowed'?'Microphone blocked. Allow microphone access for this page in your browser settings, then press Listen again.':e.error==='network'?'Speech recognition needs an internet connection. Check your connection and try again.':e.error==='audio-capture'?'No microphone was found.':'Speech recognition error: '+e.error);
+      stopAll();
+    };
+    r.onend=()=>{
+      if(L.rec!==r||!L.on||L.paused)return;
+      L.fails=Date.now()-t0<1000?L.fails+1:0;
+      if(L.fails>5){showErr('Speech recognition keeps stopping. Press Listen to try again.');stopAll();return}
+      setTimeout(()=>{if(L.on&&!L.paused)startEngine()},250);
+    };
+    L.rec=r;try{r.start()}catch(e){}
+    return;
+  }
+  if(dict){
+    L.dict=true;
+    dict.start().catch(e=>{showErr(e&&e.code==='not_granted'?'Microphone access was declined.':'Could not start speech recognition. Press Listen again.');stopAll()});
+    return;
+  }
+  showErr('Speech recognition is not supported in this browser. Try Chrome on Android, or Safari on iOS 14.5 or later.');stopAll();
+}
+function lstart(){showErr('');showLive(true);L.on=true;L.paused=false;L.muted=false;L.fails=0;L.fd=false;ui();startEngine()}
+function stopAll(){
+  const wasOn=L.on;L.on=false;L.paused=false;L.muted=false;haltEngine();clearTimeout(L.idleT);clearTimeout(L.itT);
+  if(wasOn&&L.interim.trim()){commit(L.interim,false)}else if(L.ctl)L.ctl.abort();
+  L.pending=null;clearInterim();$('lbusy').hidden=!L.items.some(x=>x.st==='wait');ui();
+}
+function micClick(){if(L.on)stopAll();else lstart()}
+function clearConvo(){L.items=[];L.pending=null;renderConvo()}
+$('lpause').onclick=()=>{
+  if(!L.on)return;
+  if(L.paused){L.paused=false;L.fails=0;ui();startEngine()}
+  else{L.paused=true;if(L.interim.trim())commit(L.interim,false);haltEngine();clearInterim();ui()}
+};
+$('lmute').onclick=()=>{if(!L.on)return;L.muted=!L.muted;if(L.muted){clearTimeout(L.idleT);clearTimeout(L.itT);if(L.ctl)L.ctl.abort();clearInterim()}ui()};
+$('lstop').onclick=stopAll;
+$('lclear').onclick=clearConvo;
+$('liveBtn').onclick=()=>{if(liveOn()){if(L.on)stopAll();showLive(false)}else{showLive(true);ui();renderConvo()}};
+// Khmer text-to-speech: play, pause, resume, stop, speed, voice
+let voices=[];
+function loadVoices(){
+  voices=(ss?ss.getVoices():[]).filter(v=>v.lang.toLowerCase().startsWith('km'));
+  const s=$('tvoice');s.textContent='';
+  voices.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+' ('+v.lang+')';s.appendChild(o)});
+  s.hidden=voices.length<2;
+  $('tnote').textContent=voices.length?'':'No Khmer voice found on this device. Add one in your system text-to-speech settings.';
+}
+function playText(t){
+  if(!t)return;
+  if(!ss)return showErr('Text-to-speech is not available in this browser.');
+  if(!voices.length)return showErr('No Khmer voice is installed on this device. Add one in your system text-to-speech settings.');
+  ss.cancel();const u=new SpeechSynthesisUtterance(t),v=voices[+$('tvoice').value||0];
+  u.voice=v;u.lang=v.lang;u.rate=+$('trate').value;ss.speak(u);
+}
+if(ss){loadVoices();if(ss.addEventListener)ss.addEventListener('voiceschanged',loadVoices)}else $('tnote').textContent='Text-to-speech is not available in this browser.';
+$('tplay').onclick=()=>playText((L.items.find(x=>x.km)||{}).km);
+$('tpause').onclick=()=>ss&&ss.pause();$('tres').onclick=()=>ss&&ss.resume();$('tstop').onclick=()=>ss&&ss.cancel();
+renderConvo();ui();
+
+// capabilities (light up when available)
+(async()=>{
+  try{if(window.claude)sample=await claude.use("sample")}catch(e){}
+  try{if(window.claude){dict=await claude.use("dictation");if(dict){dict.onPartial(({text})=>{if(L.dict)onInterim(text)});dict.onFinal(({text})=>{if(L.dict)onFinalText(text)});dict.onState(({state})=>{if(state==='idle'&&L.dict&&L.on&&!L.paused&&!L.muted)setTimeout(()=>{if(L.on&&!L.paused)startEngine()},300)})}}}catch(e){}
+  if(!sample)showErr("Translation needs Claude access. Open this page in claude.ai and allow it when asked.");
+})();
+})();
+</script>
+</body>
+</html>
